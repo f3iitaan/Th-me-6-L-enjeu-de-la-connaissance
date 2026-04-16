@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HGGSP – L'enjeu de la connaissance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+    }
+    header {
+      background: linear-gradient(135deg, #2b6cb0, #553c9a);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    header h1 { font-size: 2rem; margin-bottom: 0.4rem; }
+    header p { opacity: 0.85; font-size: 1rem; }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      background: #2d3748;
+      padding: 0.8rem;
+    }
+    nav button {
+      background: #4a5568;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    nav button:hover, nav button.active { background: #667eea; }
+
+    main { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
+
+    .section { display: none; }
+    .section.visible { display: block; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .card h2 {
+      color: #2b6cb0;
+      margin-bottom: 1rem;
+      border-left: 4px solid #667eea;
+      padding-left: 0.7rem;
+    }
+    .card h3 { color: #553c9a; margin: 0.8rem 0 0.4rem; }
+    .card p, .card li { line-height: 1.7; margin-bottom: 0.4rem; }
+    .card ul, .card ol { padding-left: 1.4rem; }
+
+    .badge {
+      display: inline-block;
+      background: #ebf4ff;
+      color: #2b6cb0;
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.8rem;
+      margin: 0.2rem;
+      font-weight: bold;
+    }
+    .badge.red { background: #fff5f5; color: #c53030; }
+    .badge.green { background: #f0fff4; color: #276749; }
+    .badge.purple { background: #faf5ff; color: #6b46c1; }
+
+    .highlight {
+      background: #fffbeb;
+      border-left: 4px solid #f6ad55;
+      padding: 0.8rem 1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 0.8rem 0;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 0.8rem; font-size: 0.9rem; }
+    th { background: #2b6cb0; color: white; padding: 0.7rem; text-align: left; }
+    td { padding: 0.6rem; border-bottom: 1px solid #e2e8f0; }
+    tr:nth-child(even) td { background: #f7fafc; }
+
+    /* QUIZ */
+    .quiz-q {
+      background: white;
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .quiz-q p { font-weight: bold; margin-bottom: 0.6rem; }
+    .quiz-q label {
+      display: block;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 0.3rem 0;
+      border: 2px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+    .quiz-q label:hover { border-color: #667eea; background: #ebf4ff; }
+    .quiz-q label.correct { background: #f0fff4; border-color: #48bb78; color: #276749; font-weight: bold; }
+    .quiz-q label.wrong { background: #fff5f5; border-color: #fc8181; color: #c53030; }
+    #quiz-score {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2b6cb0;
+      margin-top: 1rem;
+      display: none;
+    }
+    .btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.6rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: block;
+      margin: 1rem auto;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+
+    /* FICHE FLASH */
+    .flashcard {
+      perspective: 800px;
+      cursor: pointer;
+      margin: 1rem auto;
+      max-width: 600px;
+      height: 180px;
+    }
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .flashcard-front {
+      background: linear-gradient(135deg, #2b6cb0, #553c9a);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+    .flashcard-back {
+      background: white;
+      color: #1a202c;
+      transform: rotateY(180deg);
+      font-size: 0.95rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      line-height: 1.6;
+    }
+    .flash-nav { text-align: center; margin-top: 0.5rem; color: #718096; font-size: 0.9rem; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #718096;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📚 HGGSP Terminale – Thème 6</h1>
+  <p>L'enjeu de la connaissance — Fiche de révision complète pour le Bac</p>
+</header>
+
+<nav>
+  <button class="active" onclick="show('intro', this)">Introduction</button>
+  <button onclick="show('axe1', this)">Axe 1 – Produire & Diffuser</button>
+  <button onclick="show('axe2', this)">Axe 2 – Enjeu politique</button>
+  <button onclick="show('otc', this)">OTC – Cyberespace</button>
+  <button onclick="show('methodo', this)">📝 Méthodo Bac</button>
+  <button onclick="show('flash', this)">🃏 Fiches Flash</button>
+  <button onclick="show('quiz', this)">🎯 Quiz</button>
+</nav>
+
+<main>
+
+<!-- ===== INTRO ===== -->
+<div class="section visible" id="section-intro">
+  <div class="card">
+    <h2>📌 Notions clés de l'introduction</h2>
+    <h3>Différences fondamentales</h3>
+    <table>
+      <tr><th>Terme</th><th>Définition</th></tr>
+      <tr><td><strong>Information / Savoir</strong></td><td>Ce qui se trouve dans un livre — non encore appliqué</td></tr>
+      <tr><td><strong>Connaissance</strong></td><td>Information qu'on maîtrise et qu'on peut appliquer (Peter Drucker)</td></tr>
+      <tr><td><strong>Société de l'information</strong></td><td>Liée au développement des NTIC ; abondance de l'information</td></tr>
+      <tr><td><strong>Société de la communication</strong></td><td>Les médias façonnent la communication et la perception du réel</td></tr>
+      <tr><td><strong>Société de la connaissance</strong></td><td>La production et la diffusion de connaissances deviennent l'activité principale</td></tr>
+      <tr><td><strong>Économie de la connaissance</strong></td><td>La connaissance = principale matière première (Drucker, 1969)</td></tr>
+    </table>
+    <h3>Limites de la « société de la connaissance »</h3>
+    <ul>
+      <li>773 millions d'adultes analphabètes dans le monde (principalement des femmes, Afrique/Asie)</li>
+      <li>Fracture numérique : 95% des foyers nord-américains connectés vs 12% en Afrique centrale</li>
+      <li>Risque de creuser les inégalités entre pays riches et pauvres</li>
+      <li>Nouvelle discrimination fondée sur le niveau de connaissance</li>
+      <li>Le passage à la société de la connaissance « ne se décrète pas » (Jean-Pierre Alix)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>🏛️ Évolution des acteurs de la connaissance</h2>
+    <table>
+      <tr><th>Époque</th><th>Acteurs</th><th>Évolution</th></tr>
+      <tr><td>Moyen Âge</td><td>Universités</td><td>Transmettent le savoir (dogme religieux), ne le produisent pas</td></tr>
+      <tr><td>XVIIe s.</td><td>Académies (Royal Society 1662, Académie des sciences 1666…)</td><td>Vraies communautés scientifiques ; recherche expérimentale</td></tr>
+      <tr><td>XIXe s.</td><td>Universités + États</td><td>Universités = lieux de recherche (modèle humboldtien, Berlin 1810)</td></tr>
+      <tr><td>XXe s.</td><td>États + FTN + chercheurs</td><td>Enjeux politiques/économiques au cœur de la recherche</td></tr>
+      <tr><td>Aujourd'hui</td><td>+ NTIC, Wikipedia, GIEC, Panama Papers</td><td>Nouveaux acteurs collaboratifs grâce à internet</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== AXE 1 ===== -->
+<div class="section" id="section-axe1">
+  <div class="card">
+    <h2>Axe 1 — Produire et diffuser des connaissances</h2>
+    <div class="highlight">
+      <strong>Problématique :</strong> Qui produit la connaissance ? Comment se diffuse-t-elle ? Quels sont les freins ?
+    </div>
+    <h3>I. Acteurs de la production</h3>
+    <ul>
+      <li><span class="badge">Ex. clé</span> <strong>Marie & Pierre Curie</strong> : radioactivité (1896-1903) → refus de breveter → diffusion libre → coopération internationale</li>
+      <li><span class="badge">Ex. clé</span> <strong>Projet Manhattan</strong> (Oppenheimer) : coopération scientifiques + militaires + politiques → bombe atomique 1945</li>
+      <li><span class="badge">Ex. clé</span> <strong>Manifeste Russell-Einstein (1955)</strong> : appel à la paix face aux dangers du nucléaire → dilemme éthique du chercheur</li>
+    </ul>
+    <h3>Acteurs qui financent / encadrent la recherche</h3>
+    <table>
+      <tr><th>Acteur</th><th>Rôle</th><th>Exemple</th></tr>
+      <tr><td>États</td><td>Financent, orientent, encadrent éthiquement</td><td>CEA, CNES, Plan Calcul (De Gaulle), loi bioéthique 1994</td></tr>
+      <tr><td>Entreprises privées</td><td>R&D appliquée, recherche de rentabilité</td><td>Pfizer (vaccin COVID), Amazon (+ gros investisseur R&D mondial)</td></tr>
+      <tr><td>Organisations internationales</td><td>Coopération scientifique</td><td>GIEC (1988), Programme Horizon 2020 (UE), ISS</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>II. L'école et la transmission du savoir</h2>
+    <h3>Histoire de la scolarisation</h3>
+    <ul>
+      <li><strong>XVIIe s.</strong> : Petites écoles, établissements religieux (jésuites, ursulines). Débat sur l'instruction des filles.</li>
+      <li><strong>XIXe s.</strong> : École = affaire d'État. En France : loi Jules Ferry (1882) → école publique, laïque, gratuite, obligatoire (jusqu'à 13 ans).</li>
+      <li><strong>XXe s.</strong> : Démocratisation du secondaire après 1945. Collège unique : loi Haby 1975. Massification du supérieur.</li>
+    </ul>
+    <h3>Inégalités persistantes</h3>
+    <ul>
+      <li>Géographiques : Afrique subsaharienne, Asie centrale très en retard</li>
+      <li>Hommes/Femmes : 2/3 des analphabètes sont des femmes</li>
+      <li>Sociales : fracture numérique, coût des études privées</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>III. Diffusion des connaissances</h2>
+    <table>
+      <tr><th>Époque</th><th>Moyen de diffusion</th></tr>
+      <tr><td>Époque moderne</td><td>Imprimerie, journaux savants (Journal des savants 1665), Encyclopédie (Diderot & d'Alembert)</td></tr>
+      <tr><td>XIXe s.</td><td>Revues scientifiques, presse, vulgarisation (Sciences et Vie…)</td></tr>
+      <tr><td>XXe s.</td><td>Radio, télévision, musées (Cité des Sciences)</td></tr>
+      <tr><td>Aujourd'hui</td><td>Internet, Wikipedia, MOOC, réseaux sociaux, archives ouvertes (HAL), Creative Commons</td></tr>
+    </table>
+    <h3>Freins à la diffusion</h3>
+    <ul>
+      <li>Censure des États autoritaires / Index religieux</li>
+      <li>Inégalités de développement et fracture numérique</li>
+      <li>Langue : l'anglais, langue scientifique dominante</li>
+      <li>Fausses informations (fake news) sur Internet</li>
+      <li>Propriété intellectuelle (brevets, copyright)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== AXE 2 ===== -->
+<div class="section" id="section-axe2">
+  <div class="card">
+    <h2>Axe 2 — La connaissance, enjeu politique et géopolitique</h2>
+    <div class="highlight">
+      <strong>2 problématiques :</strong><br>
+      (1) Pourquoi la connaissance est-elle une condition de la souveraineté des États ?<br>
+      (2) Comment la connaissance détermine-t-elle la hiérarchie de puissance entre les États ?
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>I. La connaissance au service du pouvoir politique intérieur</h2>
+    <h3>A. Outil pour la prise de décision</h3>
+    <ul>
+      <li><span class="badge">Technocratie</span> : gouvernement par les experts. Platon (philosophes-rois), Francis Bacon (Nouvelle Atlantide)</li>
+      <li>COVID-19 → rôle du Conseil scientifique, Macron : « faire confiance à la science »</li>
+      <li>Critique : experts déconnectés du réel ; voix discordantes = « scientifisation du politique » (Habermas)</li>
+      <li>Recensements : dès Babylone (3800 av. JC), Rome (censeur), création de l'INSEE (1946)</li>
+    </ul>
+    <h3>B. Sécurité intérieure</h3>
+    <ul>
+      <li>États autoritaires : Gestapo (nazis), NKVD/KGB (URSS), Stasi (RDA)</li>
+      <li>Novlangue d'Orwell (<em>1984</em>) : contrôle de la pensée par le langage</li>
+      <li>Démocraties : DGSI, DGSE, FBI, NSA (programme PRISM, Stellar Wind)</li>
+      <li><span class="badge">Lanceurs d'alerte</span> : Pentagon Papers (Ellsberg 1971), WikiLeaks (Assange 2010), Snowden (2013)</li>
+    </ul>
+    <h3>C. Stimuler la croissance</h3>
+    <ul>
+      <li>Investissements en R&D, accès à l'enseignement supérieur (×9 en France entre 1960 et 2020)</li>
+      <li>Brain drain organisé (Allemagne attire les Indiens)</li>
+      <li>Planification : Plan Calcul (1966), Programme des Pierres Précieuses</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>II. La connaissance, source de puissance (hard & soft power)</h2>
+    <h3>A. Hard power : domination militaire</h3>
+    <ul>
+      <li>Supériorité technologique : bombe atomique (1945), RMA (Révolution dans les Affaires Militaires) depuis les années 1990, drones, IA, cyberguerre</li>
+      <li>Renseignement (espionnage) : CIA (1947), KGB (1954) ; <span class="badge">Jalon clé</span> : CIA vs KGB pendant la Guerre froide</li>
+      <li>Agents doubles : Oleg Gordievsky (KGB → MI6), les 5 de Cambridge</li>
+      <li>Protection : brevets (INPI, 20 ans), ANSSI, espionnage industriel (Concorde → URSS)</li>
+    </ul>
+    <h3>B. Soft power</h3>
+    <ul>
+      <li>Classement de Shanghai (universités) : France 3e mondiale (Paris-Saclay, PSL)</li>
+      <li>Prix Nobel : USA (377) >>> France (69, 4e)</li>
+      <li>Dépôts de brevets : 1. Chine 2. USA 3. Japon 4. Allemagne 5. Corée du Sud 6. France</li>
+      <li>Maîtrise du savoir polarisée : Amérique du Nord, Europe occidentale, Asie-Pacifique</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>III. La connaissance, enjeu des relations internationales</h2>
+    <h3>A. Sources de conflits</h3>
+    <ul>
+      <li>Appropriation illégale : époux Rosenberg (secrets atomiques → URSS, exécutés 1953)</li>
+      <li>Snowden révèle écoutes NSA sur Merkel, présidents français → crise diplomatique</li>
+      <li>Biopiraterie : arbre Neem (Inde), quinoa (Andes) → brevets contestés</li>
+      <li>Guerre technologique : Trump vs Huawei (Entity List, mai 2019)</li>
+      <li>Espionnage industriel chinois : vol de brevets estimé à 225-600 milliards $/an</li>
+    </ul>
+    <h3>B. Sources de coopérations</h3>
+    <ul>
+      <li>Mobilité étudiante indienne : 330 000 étudiants à l'étranger → « brain gain »</li>
+      <li>Bangalore = « Silicon Valley indienne » ; projet « Make in India »</li>
+      <li>Transferts technologiques (Rafale → moteur indien)</li>
+      <li>Coopérations de recherche : programme Horizon 2020, réacteur ITER, ISS</li>
+      <li>ERASMUS pour la mobilité étudiante européenne</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== OTC ===== -->
+<div class="section" id="section-otc">
+  <div class="card">
+    <h2>OTC — Le Cyberespace : conflictualité et coopération</h2>
+    <div class="highlight">
+      <strong>Problématique :</strong> Dans quelle mesure le cyberespace est-il un nouvel enjeu de puissance et un défi pour la paix mondiale ?
+    </div>
+    <h3>Naissance</h3>
+    <ul>
+      <li><strong>1968</strong> : ARPANET (Défense américaine, guerre froide)</li>
+      <li><strong>1983</strong> : protocole TCP/IP → internet universel</li>
+      <li><strong>2022</strong> : 4,95 milliards d'internautes (62% de la population mondiale)</li>
+    </ul>
+    <h3>3 couches du cyberespace</h3>
+    <table>
+      <tr><th>Couche</th><th>Contenu</th></tr>
+      <tr><td>Physique</td><td>Câbles sous-marins (450 câbles, 1,2 M km), data centers, serveurs (99% du trafic)</td></tr>
+      <tr><td>Logique</td><td>Protocoles TCP/IP, routage des paquets de données</td></tr>
+      <tr><td>Sémantique</td><td>Contenu web : textes, vidéos, échanges, réseaux sociaux</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Acteurs du cyberespace</h2>
+    <table>
+      <tr><th>Acteur</th><th>Objectifs</th></tr>
+      <tr><td>États</td><td>Contrôle, souveraineté, sécurité nationale, lutte contre criminalité</td></tr>
+      <tr><td>GAFAM / BATX / NATU</td><td>Profit, données utilisateurs, publicité ciblée. Val. boursière GAFAM > 3e PIB mondial</td></tr>
+      <tr><td>Citoyens / hacktivistes</td><td>Liberté, open data (Wikipedia, Linux). Ex : Anonymous</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Menaces et conflits dans le cyberespace</h2>
+    <ul>
+      <li><span class="badge red">Piratage / phishing</span> : vol de données bancaires, identité</li>
+      <li><span class="badge red">Rançongiciels</span> : hôpitaux français (27 attaques 2020-21), coût mondial : 6 000 Mds $ en 2021</li>
+      <li><span class="badge red">Cyberattaques</span> : Stuxnet (USA/Israël → Iran), TV5Monde (hackers russes, 2015)</li>
+      <li><span class="badge red">Désinformation</span> : Cambridge Analytica (Facebook + Trump 2016), MacronLeaks (2017)</li>
+      <li><span class="badge red">Sabotage physique</span> : câbles sous-marins (navire russe Yantar), sabotage fibre Bouches-du-Rhône 2022</li>
+    </ul>
+    <h3>Puissances du cyberespace</h3>
+    <ul>
+      <li><strong>USA</strong> : contrôlent l'ICANN, 10/13 serveurs racine sur leur territoire</li>
+      <li><strong>Chine</strong> : Great Firewall, internet chinois souverain, BATX</li>
+      <li><strong>Russie</strong> : Splinternet en développement</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Cyberdéfense et coopération</h2>
+    <h3>France</h3>
+    <ul>
+      <li>ANSSI (2009) : prévention et réaction aux incidents (600 agents)</li>
+      <li>Doctrine LIO (offensive) + LID (défensive) depuis 2019 → 4 000 cybercombattants visés d'ici 2025</li>
+      <li>CYBERCOM (2017) : commandement de cyberdéfense</li>
+    </ul>
+    <h3>Union européenne</h3>
+    <ul>
+      <li>ENISA (2004) : coordination européenne</li>
+      <li>Directive SRI (2016) → mesures obligatoires pour les acteurs numériques</li>
+      <li>Cybersecurity Act (2019) → cadre de certification</li>
+    </ul>
+    <h3>Gouvernance mondiale ?</h3>
+    <p>Pas de consensus à l'ONU. « Appel de Paris » de Macron (2018) = peu d'effets. Deux visions : internet libre vs souveraineté numérique des États.</p>
+  </div>
+</div>
+
+<!-- ===== METHODO ===== -->
+<div class="section" id="section-methodo">
+  <div class="card">
+    <h2>📝 Méthode – Composition (dissertation)</h2>
+    <h3>Structure attendue</h3>
+    <ol>
+      <li><strong>Introduction</strong> : accroche → définition des termes du sujet → problématique → annonce du plan</li>
+      <li><strong>I. (Grande partie)</strong> → A. → B. → (C.) avec transitions</li>
+      <li><strong>II. (Grande partie)</strong> → A. → B. → (C.) avec transitions</li>
+      <li><strong>III. (Grande partie)</strong> → A. → B. → (C.) avec transitions</li>
+      <li><strong>Conclusion</strong> : réponse à la problématique + ouverture</li>
+    </ol>
+    <div class="highlight">
+      💡 <strong>Règle d'or :</strong> Chaque argument = 1 idée + 1 exemple précis (nom, date, chiffre) + analyse du lien avec le sujet.
+    </div>
+    <h3>Exemples incontournables à citer</h3>
+    <ul>
+      <li>Marie Curie → coopération scientifique + refus de breveter</li>
+      <li>Projet Manhattan → enjeux militaires de la connaissance</li>
+      <li>CIA/KGB → renseignement comme arme pendant la Guerre froide</li>
+      <li>Snowden → lanceur d'alerte, cyberespace, droits civiques</li>
+      <li>GAFAM/BATX → puissance économique et culturelle du numérique</li>
+      <li>Chine (Grand Firewall) → souveraineté numérique</li>
+      <li>Inde (mobilité étudiante) → coopération et soft power</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📝 Méthode – Étude critique de documents</h2>
+    <ol>
+      <li>Identifier la nature, l'auteur, la date, le contexte du document</li>
+      <li>Dégager les idées principales (sans paraphraser)</li>
+      <li>Mettre en relation les documents entre eux</li>
+      <li>Porter un regard critique : intérêt ET limites de la source</li>
+      <li>Mobiliser des connaissances pour dépasser le document</li>
+    </ol>
+    <div class="highlight">
+      ⚠️ Ne jamais se contenter de résumer ! Toujours <em>analyser</em> et <em>contextualiser</em>.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔑 Définitions à maîtriser absolument</h2>
+    <table>
+      <tr><th>Notion</th><th>Définition courte</th></tr>
+      <tr><td>Enjeu</td><td>Ce qu'on risque de gagner ou perdre ; objet d'une compétition entre acteurs</td></tr>
+      <tr><td>Géopolitique</td><td>Rivalité de pouvoirs sur ou pour du territoire (Yves Lacoste)</td></tr>
+      <tr><td>Technocratie</td><td>Gouvernement par des experts techniques au détriment du peuple</td></tr>
+      <tr><td>Hard power</td><td>Puissance par la coercition (militaire, économique)</td></tr>
+      <tr><td>Soft power</td><td>Puissance par l'influence (culture, attractivité, réputation)</td></tr>
+      <tr><td>Brain drain</td><td>Fuite des cerveaux : émigration des talents d'un pays vers un autre</td></tr>
+      <tr><td>Cyberespace</td><td>Espace de communication créé par l'interconnexion mondiale des ordinateurs</td></tr>
+      <tr><td>Cybercriminalité</td><td>Ensemble des actes délictueux commis dans le cyberespace</td></tr>
+      <tr><td>Lanceur d'alerte</td><td>Personne qui révèle des informations secrètes dans l'intérêt public</td></tr>
+      <tr><td>Biopiraterie</td><td>Appropriation commerciale de ressources biologiques sans consentement des communautés d'origine</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== FLASH CARDS ===== -->
+<div class="section" id="section-flash">
+  <div class="card">
+    <h2>🃏 Fiches Flash — Cliquez pour retourner</h2>
+    <p style="color:#718096; margin-bottom:1rem;">Cliquez sur la carte pour voir la réponse. Utilisez les boutons pour naviguer.</p>
+    <div class="flashcard" id="flashcard" onclick="this.classList.toggle('flipped')">
+      <div class="flashcard-inner">
+        <div class="flashcard-front" id="flash-front">Chargement…</div>
+        <div class="flashcard-back" id="flash-back">Chargement…</div>
+      </div>
+    </div>
+    <div class="flash-nav">
+      <button class="btn" onclick="prevFlash()" style="display:inline-block; margin:0.3rem;">← Précédent</button>
+      <span id="flash-counter">1 / 15</span>
+      <button class="btn" onclick="nextFlash()" style="display:inline-block; margin:0.3rem;">Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div class="section" id="section-quiz">
+  <div class="card">
+    <h2>🎯 Quiz – 15 questions pour tester tes connaissances</h2>
+    <div id="quiz-container"></div>
+    <button class="btn" onclick="checkQuiz()">Valider mes réponses</button>
+    <div id="quiz-score"></div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Révision HGGSP Terminale – Thème 6 : L'enjeu de la connaissance · Bonne chance au Bac ! 🎓
+</footer>
+
+<script>
+// ===== NAVIGATION =====
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('visible');
+  btn.classList.add('active');
+}
+
+// ===== FLASH CARDS =====
+const flashData = [
+  { q: "Quelle est la différence entre information et connaissance ? (Drucker)", a: "L'information est ce qui se trouve dans un livre. La connaissance, c'est l'information qu'on maîtrise et qu'on peut appliquer concrètement." },
+  { q: "Qu'est-ce que la géopolitique selon Yves Lacoste ?", a: "La rivalité de pouvoirs sur ou pour du territoire. Sans territoire, pas de géopolitique." },
+  { q: "Qu'est-ce que la technocratie ? Donnez un exemple philosophique.", a: "Gouvernement par les experts techniques. Exemple : Platon dans La République préconise un gouvernement par les philosophes." },
+  { q: "Qui a découvert la radioactivité ? En quelle année ?", a: "Henri Becquerel en 1896. Marie et Pierre Curie ont ensuite découvert le radium et le polonium. Prix Nobel de physique en 1903." },
+  { q: "Qu'est-ce que le Projet Manhattan ? Quel dilemme illustre-t-il ?", a: "Programme américain de création de la bombe atomique (Oppenheimer). Il illustre le dilemme éthique des scientifiques : faire avancer la science sans que les découvertes soient utilisées à de mauvaises fins." },
+  { q: "Que sont les Pentagon Papers ?", a: "Un rapport ultra-secret révélé par Daniel Ellsberg en 1971 montrant que le gouvernement américain avait généralisé la guerre du Vietnam à l'insu du Congrès. Exemple de lanceur d'alerte." },
+  { q: "Qu'est-ce que le PRISM ? Qui l'a révélé ?", a: "Programme de surveillance des communications américain (NSA). Révélé par Edward Snowden en 2013. Snowden est réfugié en Russie depuis." },
+  { q: "Quelles sont les 3 couches du cyberespace ?", a: "1. Couche physique (câbles, serveurs, data centers)\n2. Couche logique (protocoles TCP/IP, routage)\n3. Couche sémantique (contenus, échanges)" },
+  { q: "Qui contrôle techniquement internet ? Comment ?", a: "Les États-Unis contrôlent internet via l'ICANN (société privée créée en 1998) et possèdent 10 des 13 serveurs racine mondiaux." },
+  { q: "Qu'est-ce que le Great Firewall chinois ?", a: "La 'grande muraille virtuelle' de Chine : système de censure qui bloque l'accès aux réseaux sociaux étrangers (Facebook, Twitter) et utilise l'IA pour filtrer les contenus." },
+  { q: "Qu'est-ce que le Stuxnet ? Qui l'a développé ?", a: "Un logiciel malveillant développé par les États-Unis et Israël pour saboter le programme nucléaire iranien. Premier exemple connu de cyberarme étatique." },
+  { q: "Qu'est-ce que la biopiraterie ? Donnez un exemple.", a: "Appropriation commerciale de ressources biologiques sans consentement des communautés d'origine. Ex : brevet américain sur l'arbre Neem indien, finalement révoqué." },
+  { q: "Qu'est-ce que le 'brain gain' à propos de l'Inde ?", a: "Contrairement au 'brain drain' (fuite des cerveaux), le 'brain gain' désigne le bénéfice que tire l'Inde de sa diaspora à l'étranger : transferts de compétences, financiers, partenariats commerciaux. Ex : Bangalore = Silicon Valley indienne." },
+  { q: "Qu'est-ce que l'ANSSI ? Quel est son rôle ?", a: "L'Agence nationale de la sécurité des systèmes d'information (créée en 2009). Elle prévient et réagit aux incidents informatiques visant les institutions sensibles françaises (600 agents)." },
+  { q: "Qu'est-ce que le Cybersecurity Act européen (2019) ?", a: "Un règlement européen qui renforce le rôle de l'ENISA et établit un cadre commun de certification de cybersécurité à 3 niveaux : élémentaire, substantiel, élevé." },
+];
+
+let currentFlash = 0;
+function updateFlash() {
+  const card = document.getElementById('flashcard');
+  card.classList.remove('flipped');
+  document.getElementById('flash-front').textContent = flashData[currentFlash].q;
+  document.getElementById('flash-back').textContent = flashData[currentFlash].a;
+  document.getElementById('flash-counter').textContent = (currentFlash + 1) + ' / ' + flashData.length;
+}
+function nextFlash() { currentFlash = (currentFlash + 1) % flashData.length; updateFlash(); }
+function prevFlash() { currentFlash = (currentFlash - 1 + flashData.length) % flashData.length; updateFlash(); }
+updateFlash();
+
+// ===== QUIZ =====
+const quizData = [
+  { q: "Selon Peter Drucker, qu'est-ce qui différencie la connaissance de l'information ?", opts: ["La quantité", "L'application pratique de l'information", "La langue utilisée", "Le support (livre ou écran)"], ans: 1 },
+  { q: "En quelle année a été créée l'INSEE, ancêtre du Bureau des statistiques ?", opts: ["1801", "1900", "1946", "1975"], ans: 2 },
+  { q: "Qui a révélé l'espionnage de la NSA sur les dirigeants européens ?", opts: ["Julian Assange", "Daniel Ellsberg", "Edward Snowden", "Li Wenliang"], ans: 2 },
+  { q: "Que signifie l'acronyme KGB ?", opts: ["Kommittee Général des Brigades", "Comité pour la sécurité de l'État (soviétique)", "Corps de Garde des Bolcheviks", "Kommission de Guerre Bilatérale"], ans: 1 },
+  { q: "Quel est le nom du réseau ancêtre d'internet, créé en 1968 par la Défense américaine ?", opts: ["TCP/IP", "ARPANET", "DARPA-NET", "ICANN"], ans: 1 },
+  { q: "Quelle entreprise représente 90% des requêtes mondiales sur internet ?", opts: ["Amazon", "Facebook", "Google", "Microsoft"], ans: 2 },
+  { q: "Quel logiciel malveillant a été utilisé par les USA et Israël contre le programme nucléaire iranien ?", opts: ["Pegasus", "WannaCry", "Stuxnet", "Mirai"], ans: 2 },
+  { q: "Le classement de Shanghai mesure :", opts: ["Le PIB des grandes villes", "La qualité des universités mondiales", "Les dépôts de brevets par pays", "Le nombre de prix Nobel par habitant"], ans: 1 },
+  { q: "Quel pays arrive en 1ère place des dépôts de brevets mondiaux depuis 2019 ?", opts: ["États-Unis", "Japon", "Allemagne", "Chine"], ans: 3 },
+  { q: "La loi Jules Ferry (1882) en France établit :", opts: ["L'université gratuite", "L'école primaire publique, laïque, gratuite et obligatoire", "Le collège unique", "La gratuité des lycées"], ans: 1 },
+  { q: "Qu'est-ce que la 'novlangue' dans le roman 1984 d'Orwell ?", opts: ["Une langue secrète des espions", "Un langage informatique", "Un système qui vise à rendre impossible la pensée contestataire en supprimant des mots", "Le nom d'un journal de propagande"], ans: 2 },
+  { q: "Les époux Rosenberg ont été exécutés en 1953 pour avoir :", opts: ["Assassiné le président américain", "Transmis des secrets atomiques à l'URSS", "Fondé le parti communiste américain", "Espionné pour la Chine"], ans: 1 },
+  { q: "Qu'est-ce que l'Initiative de Budapest pour l'Accès Ouvert (2002) ?", opts: ["Un accord commercial entre nations européennes", "Un appel à la libre diffusion des publications scientifiques sur internet", "La création de l'ICANN", "Un traité de désarmement nucléaire"], ans: 1 },
+  { q: "Quel est le rôle de l'ENISA ?", opts: ["Agence européenne de défense militaire", "Agence européenne de cybersécurité, aide les États à se protéger", "Agence de notation des universités européennes", "Commission européenne de la recherche spatiale"], ans: 1 },
+  { q: "Qu'est-ce que le 'Splinternet' russe ?", opts: ["Un réseau social russe rival de Facebook", "La tentative de la Russie de créer un internet national souverain, isolé du reste du monde", "Un programme de cyberespionnage russe", "Le nom du Great Firewall russe"], ans: 1 },
+];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  quizData.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-q';
+    div.innerHTML = `<p>${i+1}. ${item.q}</p>` +
+      item.opts.map((o, j) => `<label id="q${i}-o${j}"><input type="radio" name="q${i}" value="${j}" style="margin-right:0.5rem">${o}</label>`).join('');
+    container.appendChild(div);
+  });
+}
+buildQuiz();
+
+function checkQuiz() {
+  let score = 0;
+  quizData.forEach((item, i) => {
+    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+    const val = selected ? parseInt(selected.value) : -1;
+    item.opts.forEach((_, j) => {
+      const lbl = document.getElementById(`q${i}-o${j}`);
+      lbl.classList.remove('correct', 'wrong');
+      if (j === item.ans) lbl.classList.add('correct');
+      else if (j === val && val !== item.ans) lbl.classList.add('wrong');
+    });
+    if (val === item.ans) score++;
+  });
+  const scoreDiv = document.getElementById('quiz-score');
+  scoreDiv.style.display = 'block';
+  let msg = score >= 13 ? "🏆 Excellent ! Tu es prêt(e) pour le Bac !" :
+            score >= 10 ? "👍 Bien ! Relis les fiches pour les erreurs." :
+            "📚 Continue à réviser, tu vas y arriver !";
+  scoreDiv.innerHTML = `Score : ${score} / ${quizData.length} — ${msg}`;
+}
+</script>
+</body>
+</html>
